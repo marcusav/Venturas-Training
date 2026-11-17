@@ -48,7 +48,11 @@ export default async function Config({
       <section className="card">
         <ul className="list">
           <Line ok={db.ok} label="Banco de dados" detail={db.ok ? undefined : db.error} />
-          <Line ok={env.hasClaude} label="Claude API" detail={env.hasClaude ? undefined : "Defina ANTHROPIC_API_KEY na Vercel."} />
+          <Line
+            ok={env.hasClaude}
+            label="Claude API (opcional)"
+            detail={env.hasClaude ? "Feedback escrito pelo Claude." : "Sem chave: o feedback é automático, por regras (grátis)."}
+          />
           <Line
             ok={active}
             label="Webhook do Strava"

@@ -1,6 +1,8 @@
 import {
   analyzeActivity,
   computeLoad,
+  missedTarget,
+  ruleBasedFeedback,
   DEFAULT_HR_ZONES,
   type ActivitySummary,
   type HrZones,
@@ -100,38 +102,49 @@ export async function processActivity(
   await feedbackFor(athleteId, activityId);
 }
 
-/** Gera (ou regenera) o feedback do Claude a partir do que já está no banco. */
+/**
+ * Gera (ou regenera) o feedback a partir do que já está no banco: pelo Claude quando
+ * ANTHROPIC_API_KEY está definida, senão por regras (grátis).
+ */
 export async function feedbackFor(athleteId: number, activityId: number): Promise<string | null> {
-  if (!env.hasClaude) return null;
   const all = await listActivities(athleteId, 60);
   const current = all.find((r) => r.id === activityId);
   if (!current?.analysis) return null;
 
   const localDate = (current.start_date_local ?? current.start_date.toISOString()).slice(0, 10);
   const load = computeLoad(all.map(toSummary), current.start_date);
-  const previous = all
+  const prevRuns = all
     .filter((r) => r.start_date < current.start_date && RUN_TYPES.has(r.sport_type))
-    .slice(0, 2)
-    .map((r) => ({
+    .slice(0, 2);
+  const previous = prevRuns.map((r) => ({
       date: (r.start_date_local ?? "").slice(0, 10),
       verdict: verdictOf(r.feedback),
     }));
   const next =
     PLAN.flatMap((w) => w.workouts).find((w) => w.date > localDate) ?? null;
 
-  const text = await generateFeedback({
-    activity: {
-      name: current.name,
-      date: localDate,
-      sportType: current.sport_type,
-      avgSpeed: current.avg_speed,
-    },
-    analysis: current.analysis,
-    load,
-    planned: workoutOn(localDate),
-    next,
-    previous,
-  });
+  const planned = workoutOn(localDate);
+  const text = env.hasClaude
+    ? await generateFeedback({
+        activity: {
+          name: current.name,
+          date: localDate,
+          sportType: current.sport_type,
+          avgSpeed: current.avg_speed,
+        },
+        analysis: current.analysis,
+        load,
+        planned,
+        next,
+        previous,
+      })
+    : ruleBasedFeedback({
+        analysis: current.analysis,
+        load,
+        planned,
+        next,
+        previousMisses: prevRuns.filter((r) => missedTarget(r.analysis)).length,
+      });
   await saveFeedback(activityId, text);
   const url = `${env.appUrl}/corridas/${activityId}`;
   await notifyTelegram(`🏃 ${current.name ?? "Corrida"} (${localDate})\n\n${text}\n\n${url}`);

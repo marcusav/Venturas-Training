@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       if (ev.aspect_type === "delete") {
         await removeActivity(ev.owner_id, ev.object_id);
       } else {
-        // Feedback do Claude só na criação; edições (ex.: título) só reanalisam.
+        // Feedback só na criação; edições (ex.: título) só reanalisam.
         await processActivity(ev.owner_id, ev.object_id, { feedback: ev.aspect_type === "create" });
       }
     } catch (e) {

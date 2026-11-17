@@ -59,15 +59,14 @@ export default async function Corrida({
             <div className="feedback">{body}</div>
           </>
         ) : (
-          <p className="muted">
-            {env.hasClaude ? "Ainda sem feedback para esta corrida." : "Configure a ANTHROPIC_API_KEY para receber feedback."}
-          </p>
+          <p className="muted">Ainda sem feedback para esta corrida.</p>
         )}
-        {env.hasClaude && (
-          <form action={`/api/activities/${r.id}/feedback`} method="post" style={{ marginTop: 10 }}>
-            <button className="btn ghost" type="submit">{r.feedback ? "Refazer feedback" : "Gerar feedback"}</button>
-          </form>
-        )}
+        <form action={`/api/activities/${r.id}/feedback`} method="post" style={{ marginTop: 10 }}>
+          <button className="btn ghost" type="submit">{r.feedback ? "Refazer feedback" : "Gerar feedback"}</button>
+        </form>
+        <p className="small muted">
+          {env.hasClaude ? "Feedback escrito pelo Claude." : "Feedback automático por regras (gratuito)."}
+        </p>
       </section>
 
       {a ? (

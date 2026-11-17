@@ -11,7 +11,7 @@ Treinador virtual de corrida integrado ao Strava. É um app web instalável (PWA
   - **Pace ajustado ao desnível (GAP)**, pelo custo energético de Minetti.
   - **Splits por km**: negativo, constante ou positivo, e saída forte demais.
   - **Carga (ACWR)**: 7 dias vs média semanal de 28 dias, e alerta de aumento semanal acima de 15%.
-- **Feedback do Claude** em português, começando pelo veredito, e opcionalmente enviado pelo Telegram.
+- **Feedback pós-treino** em português, começando pelo veredito. Sem custo, ele é gerado por regras; com uma chave da Claude API (opcional, paga), o Claude escreve o texto. Pode ser enviado pelo Telegram.
 - **Plano de treino** (em `src/lib/plan.ts`) com a semana atual na tela inicial.
 
 ## Configuração (uma vez)
@@ -21,8 +21,8 @@ Treinador virtual de corrida integrado ao Strava. É um app web instalável (PWA
 2. Em *Project Settings → Database → Connection string*, copie a URI do **Transaction pooler** (porta 6543). Esse é o `DATABASE_URL`.
 3. Crie as tabelas: no *SQL Editor*, cole o conteúdo de `db/schema.sql` e rode. Também dá para rodar `DATABASE_URL=... npm run db:migrate`.
 
-### 2. Claude API
-Crie uma chave em https://console.anthropic.com/settings/keys. Esse é o `ANTHROPIC_API_KEY`. Cada feedback custa alguns centavos.
+### 2. Claude API (opcional)
+O app funciona de graça sem ela, com feedback por regras. Para o Claude escrever o feedback, crie uma chave em https://console.anthropic.com/settings/keys (exige créditos) e defina `ANTHROPIC_API_KEY`.
 
 ### 3. Deploy na Vercel (grátis)
 1. Em https://vercel.com, importe este repositório.

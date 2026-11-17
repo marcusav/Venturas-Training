@@ -159,6 +159,12 @@ describe("carga (ACWR)", () => {
     expect(r.weeklyJumpFlag).toBe(true);
   });
 
+  it("sem histórico de 2–4 semanas, não calcula ACWR", () => {
+    const r = computeLoad([run("2026-11-10", 5), run("2026-11-15", 8)], new Date("2026-11-16T00:00:00Z"));
+    expect(r.acwr).toBeNull();
+    expect(r.status).toBeNull();
+  });
+
   it("ignora atividades que não são corrida", () => {
     const r = computeLoad(
       [{ ...run("2026-11-16", 30), sportType: "Ride" }],

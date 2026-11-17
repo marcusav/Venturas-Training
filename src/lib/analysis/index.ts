@@ -10,6 +10,7 @@ export * from "./zones";
 export * from "./load";
 export * from "./gap";
 export * from "./format";
+export * from "./verdict";
 
 export interface ActivityAnalysis {
   version: 1;

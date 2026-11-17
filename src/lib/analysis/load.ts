@@ -53,7 +53,10 @@ export function computeLoad(activities: ActivitySummary[], asOf = new Date()): L
   const acuteKm = kmBetween(end - 7 * DAY, end);
   const prevKm = kmBetween(end - 14 * DAY, end - 7 * DAY);
   const chronicWeeklyKm = kmBetween(end - 28 * DAY, end) / 4;
-  const acwr = chronicWeeklyKm > 0 ? acuteKm / chronicWeeklyKm : null;
+  // Sem nenhuma corrida entre 14 e 28 dias atrás, a média crônica não representa o histórico
+  // (ex.: logo após conectar o app) e o ACWR sairia inflado.
+  const hasHistory = kmBetween(end - 28 * DAY, end - 14 * DAY) > 0;
+  const acwr = chronicWeeklyKm > 0 && hasHistory ? acuteKm / chronicWeeklyKm : null;
   const weekOverWeekPct = prevKm > 0 ? (acuteKm / prevKm - 1) * 100 : null;
 
   const thisWeek = weekStart(asOf);
