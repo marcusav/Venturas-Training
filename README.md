@@ -35,7 +35,10 @@ Crie uma chave em https://console.anthropic.com/settings/keys. Esse é o `ANTHRO
    - *Authorization Callback Domain*: só o domínio, sem `https://` (ex.: `venturas-training.vercel.app`).
 2. Copie *Client ID* e *Client Secret* para as variáveis `STRAVA_CLIENT_ID` e `STRAVA_CLIENT_SECRET` na Vercel e faça *Redeploy*.
 
-### 5. Registrar o webhook (uma vez)
+### 5. Ativar o webhook (uma vez)
+Entre no app, abra **Configuração** (no fim da tela inicial) e toque em **Ativar webhook do Strava**. A tela também mostra se o banco, a Claude API e o Telegram estão configurados.
+
+Alternativa pelo terminal:
 ```bash
 curl -X POST https://www.strava.com/api/v3/push_subscriptions \
   -F client_id=SEU_CLIENT_ID \

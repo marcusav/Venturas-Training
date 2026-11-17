@@ -91,9 +91,12 @@ export default async function Home({
         )}
       </section>
 
-      <form action="/api/auth/logout" method="post" style={{ textAlign: "center" }}>
-        <button className="btn ghost" type="submit">Sair</button>
-      </form>
+      <div className="row" style={{ justifyContent: "center" }}>
+        <Link className="btn ghost" href="/config">Configuração</Link>
+        <form action="/api/auth/logout" method="post">
+          <button className="btn ghost" type="submit">Sair</button>
+        </form>
+      </div>
     </main>
   );
 }

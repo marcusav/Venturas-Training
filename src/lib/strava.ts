@@ -128,3 +128,46 @@ export interface StravaActivity {
   has_heartrate?: boolean;
   athlete: { id: number };
 }
+
+/* ---------- Assinatura do webhook (uma por app do Strava) ---------- */
+
+export interface PushSubscription {
+  id: number;
+  callback_url: string;
+}
+
+const PUSH = "https://www.strava.com/api/v3/push_subscriptions";
+
+export async function listPushSubscriptions(): Promise<PushSubscription[]> {
+  const p = new URLSearchParams({
+    client_id: env.stravaClientId,
+    client_secret: env.stravaClientSecret,
+  });
+  const res = await fetch(`${PUSH}?${p}`, { cache: "no-store" });
+  if (!res.ok) throw new StravaError(res.status, `Falha ao consultar o webhook (${res.status})`);
+  return res.json();
+}
+
+export const webhookCallbackUrl = () => `${env.appUrl}/api/webhook`;
+
+/** Cria a assinatura. O Strava chama GET /api/webhook para validar antes de responder. */
+export async function createPushSubscription(): Promise<PushSubscription> {
+  const body = new URLSearchParams({
+    client_id: env.stravaClientId,
+    client_secret: env.stravaClientSecret,
+    callback_url: webhookCallbackUrl(),
+    verify_token: env.webhookVerifyToken,
+  });
+  const res = await fetch(PUSH, { method: "POST", body, cache: "no-store" });
+  if (!res.ok) throw new StravaError(res.status, `Strava recusou o webhook (${res.status}): ${await res.text()}`);
+  return res.json();
+}
+
+export async function deletePushSubscription(id: number): Promise<void> {
+  const p = new URLSearchParams({
+    client_id: env.stravaClientId,
+    client_secret: env.stravaClientSecret,
+  });
+  const res = await fetch(`${PUSH}/${id}?${p}`, { method: "DELETE", cache: "no-store" });
+  if (!res.ok && res.status !== 404) throw new StravaError(res.status, `Falha ao remover o webhook (${res.status})`);
+}
