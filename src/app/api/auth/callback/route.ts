@@ -8,6 +8,16 @@ import { createSession } from "@/lib/session";
 import { exchangeCode, SCOPES } from "@/lib/strava";
 
 export async function GET(req: NextRequest) {
+  try {
+    return await handle(req);
+  } catch (e) {
+    console.error("login falhou", e);
+    const msg = e instanceof Error ? e.message : "Erro inesperado no login";
+    return NextResponse.redirect(new URL(`/login?erro=${encodeURIComponent(msg)}`, req.url));
+  }
+}
+
+async function handle(req: NextRequest) {
   const url = req.nextUrl;
   const fail = (msg: string) =>
     NextResponse.redirect(`${env.appUrl}/login?erro=${encodeURIComponent(msg)}`);
