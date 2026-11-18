@@ -41,7 +41,7 @@ export default async function Config({
     <main>
       <header className="top">
         <h1>Configuração</h1>
-        <Link href="/">Voltar</Link>
+        <Link href="/ajustes" className="small">‹ Ajustes</Link>
       </header>
       {webhook && <p className="notice">Webhook ativado. As próximas corridas chegam sozinhas.</p>}
       {erro && <p className="notice">{erro}</p>}

@@ -101,3 +101,54 @@ export function dateBR(iso: string) {
   });
   return `${wd.replace(".", "")} ${d}/${m}${y === String(new Date().getFullYear()) ? "" : `/${y}`}`;
 }
+
+const WD_SHORT = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+export type DayState = "feito" | "planejado" | "pulado" | "perdido" | "descanso" | "extra";
+
+/** Faixa com os 7 dias da semana (seg → dom) e o status de cada um. */
+export function WeekStrip({
+  start,
+  today,
+  states,
+}: {
+  start: string;
+  today: string;
+  states: Record<string, DayState>;
+}) {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(`${start}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + i);
+    return d.toISOString().slice(0, 10);
+  });
+  return (
+    <div className="weekstrip">
+      {days.map((d) => {
+        const st = states[d] ?? "descanso";
+        return (
+          <div key={d} className={`day ${st} ${d === today ? "today" : ""}`} title={st}>
+            <small>{WD_SHORT[new Date(`${d}T12:00:00Z`).getUTCDay()]}</small>
+            <b>{d.slice(8, 10)}</b>
+            <i />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function Icon({ name, size = 20 }: { name: "sync" | "edit" | "skip" | "undo" | "chevron" | "check"; size?: number }) {
+  const paths: Record<string, React.ReactNode> = {
+    sync: <path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4" />,
+    edit: <path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" />,
+    skip: <path d="M6 5v14l9-7zM18 5v14" />,
+    undo: <path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" />,
+    chevron: <path d="m9 6 6 6-6 6" />,
+    check: <path d="m5 12 5 5 9-10" />,
+  };
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[name]}
+    </svg>
+  );
+}

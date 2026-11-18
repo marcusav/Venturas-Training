@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import { env } from "./env";
 import type { ActivityAnalysis, HrZones } from "./analysis";
+import type { TrainingDays, WorkoutOverride } from "./plan";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -126,4 +127,79 @@ export async function listActivities(athleteId: number, sinceDays = 56): Promise
     where athlete_id = ${athleteId} and start_date > now() - make_interval(days => ${sinceDays})
     order by start_date desc`;
   return rows.map(normalizeActivity);
+}
+
+/* ---------- Personalização ---------- */
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __schemaV2: Promise<void> | undefined;
+}
+
+/** Cria as colunas/tabela de personalização se ainda não existirem (uma vez por instância). */
+export function ensurePersonalization(): Promise<void> {
+  if (!globalThis.__schemaV2) {
+    globalThis.__schemaV2 = (async () => {
+      await sql()`alter table athletes add column if not exists prefs jsonb`;
+      await sql()`
+        create table if not exists workout_overrides (
+          athlete_id bigint not null references athletes(id) on delete cascade,
+          planned_date date not null,
+          new_date date,
+          km real,
+          skipped boolean not null default false,
+          updated_at timestamptz not null default now(),
+          primary key (athlete_id, planned_date)
+        )`;
+    })().catch((e) => {
+      globalThis.__schemaV2 = undefined;
+      throw e;
+    });
+  }
+  return globalThis.__schemaV2;
+}
+
+export interface AthletePrefs {
+  days?: TrainingDays;
+}
+
+export async function getPrefs(athleteId: number): Promise<AthletePrefs> {
+  await ensurePersonalization();
+  const rows = await sql()`select prefs from athletes where id = ${athleteId}`;
+  return (rows[0]?.prefs as AthletePrefs | null) ?? {};
+}
+
+export async function savePrefs(athleteId: number, prefs: AthletePrefs) {
+  await ensurePersonalization();
+  await sql()`update athletes set prefs = ${sql().json(prefs as never)}, updated_at = now() where id = ${athleteId}`;
+}
+
+const isoDate = (v: unknown): string | null =>
+  v == null ? null : v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10);
+
+export async function listOverrides(athleteId: number): Promise<WorkoutOverride[]> {
+  await ensurePersonalization();
+  const rows = await sql()`
+    select planned_date::text as planned_date, new_date::text as new_date, km, skipped
+    from workout_overrides where athlete_id = ${athleteId}`;
+  return rows.map((r) => ({
+    plannedDate: isoDate(r.planned_date)!,
+    date: isoDate(r.new_date),
+    km: r.km == null ? null : Number(r.km),
+    skipped: Boolean(r.skipped),
+  }));
+}
+
+export async function saveOverride(athleteId: number, o: WorkoutOverride) {
+  await ensurePersonalization();
+  await sql()`
+    insert into workout_overrides (athlete_id, planned_date, new_date, km, skipped)
+    values (${athleteId}, ${o.plannedDate}, ${o.date ?? null}, ${o.km ?? null}, ${Boolean(o.skipped)})
+    on conflict (athlete_id, planned_date) do update set
+      new_date = excluded.new_date, km = excluded.km, skipped = excluded.skipped, updated_at = now()`;
+}
+
+export async function deleteOverride(athleteId: number, plannedDate: string) {
+  await ensurePersonalization();
+  await sql()`delete from workout_overrides where athlete_id = ${athleteId} and planned_date = ${plannedDate}`;
 }
