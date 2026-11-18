@@ -127,13 +127,13 @@ function buildWeek(t: WeekTemplate, prefs: TrainingDays): PlanWeek {
 const TEMPLATE: WeekTemplate[] = [
   // Semana 1 excepcional: quarta, quinta e sábado.
   { start: "2026-11-16", label: "Semana 1: retomada", easy1: 4.5, easy2: 5, long: 6, days: { easy1: 3, easy2: 4, long: 6 } },
-  { start: "2026-11-23", label: "Semana 2", easy1: 5, easy2: 5, long: 7 },
-  { start: "2026-11-30", label: "Semana 3", easy1: 5, easy2: 5.5, long: 8 },
-  { start: "2026-12-07", label: "Semana 4: alívio", easy1: 4, easy2: 4, long: 6, deload: true },
-  { start: "2026-12-14", label: "Semana 5", easy1: 5.5, easy2: 5.5, long: 10 },
-  { start: "2026-12-21", label: "Semana 6", easy1: 5.5, easy2: 6, long: 11.5 },
-  { start: "2026-12-28", label: "Semana 7: alívio", easy1: 5, easy2: 5, long: 8, deload: true },
-  { start: "2027-01-04", label: "Semana 8: primeiro 15 km", easy1: 5, easy2: 5, long: 15 },
+  { start: "2026-11-23", label: "Semana 2", easy1: 6, easy2: 6, long: 7.5 },
+  { start: "2026-11-30", label: "Semana 3", easy1: 6.5, easy2: 6.5, long: 9 },
+  { start: "2026-12-07", label: "Semana 4: alívio", easy1: 5, easy2: 5, long: 7, deload: true },
+  { start: "2026-12-14", label: "Semana 5", easy1: 7, easy2: 7, long: 11 },
+  { start: "2026-12-21", label: "Semana 6", easy1: 7, easy2: 7, long: 13 },
+  { start: "2026-12-28", label: "Semana 7: alívio", easy1: 6, easy2: 6, long: 9, deload: true },
+  { start: "2027-01-04", label: "Semana 8: primeiro 15 km", easy1: 6, easy2: 6, long: 15 },
 ];
 
 /** Planilha com os dias escolhidos pelo atleta (sem as personalizações por treino). */
