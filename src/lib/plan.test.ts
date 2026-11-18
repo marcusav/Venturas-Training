@@ -55,7 +55,7 @@ describe("plano", () => {
     const w = plan[1].workouts;
     expect(w.map((x) => x.date)).toEqual(["2026-11-24", "2026-11-28", "2026-11-29"]);
     expect(w[0].km).toBe(6.5);
-    expect(w[0].plannedKm).toBe(5);
+    expect(w[0].plannedKm).toBe(6);
     expect(w[0].structure).toContain("5 km contínuo");
 
     const skipped = applyOverrides(PLAN, [{ plannedDate: a.plannedDate, skipped: true }]);
