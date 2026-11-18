@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 import { PLAN, weekFor, workoutOn } from "./plan";
 
 describe("plano", () => {
-  it("treinos caem em terça, quinta e sábado", () => {
-    for (const w of PLAN) {
+  it("a partir da semana 2, treinos caem em terça, quinta e sábado", () => {
+    for (const w of PLAN.slice(1)) {
       const days = w.workouts.map((x) => new Date(`${x.date}T12:00:00Z`).getUTCDay());
       expect(days).toEqual([2, 4, 6]);
     }
+  });
+
+  it("semana 1 cai em quarta, quinta e sábado", () => {
+    const days = PLAN[0].workouts.map((x) => new Date(`${x.date}T12:00:00Z`).getUTCDay());
+    expect(days).toEqual([3, 4, 6]);
   });
 
   it("primeiro 15 km no sábado 09/01/2027", () => {

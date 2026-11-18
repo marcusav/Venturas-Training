@@ -40,6 +40,7 @@ function week(
   thu: number,
   sat: number,
   deload = false,
+  days: [number, number, number] = [1, 3, 5], // offsets a partir da segunda
 ): PlanWeek {
   const add = (days: number) => {
     const d = new Date(`${start}T12:00:00Z`);
@@ -53,21 +54,21 @@ function week(
     deload,
     workouts: [
       {
-        date: add(1),
+        date: add(days[0]),
         type: "Rodagem leve",
         km: tue,
         structure: `1 km trote bem leve, ${br(tue - 1.5)} km contínuo, 0,5 km solto`,
         target: Z2,
       },
       {
-        date: add(3),
+        date: add(days[1]),
         type: "Leve + strides",
         km: thu,
         structure: `1 km aquecimento, ${br(thu - 1.5)} km Z2, 4×20 s strides soltos, 0,5 km solto`,
         target: `${Z2}; strides sem forçar`,
       },
       {
-        date: add(5),
+        date: add(days[2]),
         type: isGoal ? "Longo 15 km" : "Longo",
         km: sat,
         structure: isGoal
@@ -80,7 +81,8 @@ function week(
 }
 
 export const PLAN: PlanWeek[] = [
-  week("2026-11-16", "Semana 1: retomada", 4.5, 5, 6),
+  // Semana 1 excepcional: quarta, quinta e sábado.
+  week("2026-11-16", "Semana 1: retomada", 4.5, 5, 6, false, [2, 3, 5]),
   week("2026-11-23", "Semana 2", 5, 5, 7),
   week("2026-11-30", "Semana 3", 5, 5.5, 8),
   week("2026-12-07", "Semana 4: alívio", 4, 4, 6, true),
