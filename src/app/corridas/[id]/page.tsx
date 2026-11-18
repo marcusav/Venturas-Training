@@ -4,6 +4,7 @@ import { formatPace, paceFromSpeed, round } from "@/lib/analysis";
 import { verdictOf } from "@/lib/coach";
 import { getActivity } from "@/lib/db";
 import { env } from "@/lib/env";
+import { myPlan } from "@/lib/my-plan";
 import { workoutOn } from "@/lib/plan";
 import { requireAthleteId } from "@/lib/session";
 import { dateBR, runLine, ZoneBar } from "@/components/ui";
@@ -24,7 +25,7 @@ export default async function Corrida({
   if (!r) notFound();
   const a = r.analysis;
   const date = (r.start_date_local ?? r.start_date.toISOString()).slice(0, 10);
-  const planned = workoutOn(date);
+  const planned = workoutOn(date, (await myPlan(athleteId)).plan);
   const verdict = verdictOf(r.feedback);
   const body = r.feedback?.replace(/^\s*veredito:.*\n?/im, "").trim();
 
@@ -32,7 +33,7 @@ export default async function Corrida({
     <main>
       <header className="top">
         <h1>{r.name ?? "Corrida"}</h1>
-        <Link href="/">Voltar</Link>
+        <Link href="/corridas" className="small">‹ Corridas</Link>
       </header>
 
       <section className="card">

@@ -33,3 +33,16 @@ create table if not exists activities (
 );
 
 create index if not exists activities_athlete_date on activities (athlete_id, start_date desc);
+
+-- Personalização (dias de treino e ajustes por treino). Também é criada sozinha pelo app.
+alter table athletes add column if not exists prefs jsonb;
+
+create table if not exists workout_overrides (
+  athlete_id    bigint not null references athletes(id) on delete cascade,
+  planned_date  date not null,                 -- data original na planilha
+  new_date      date,                          -- movido para outro dia
+  km            real,                          -- distância ajustada
+  skipped       boolean not null default false,
+  updated_at    timestamptz not null default now(),
+  primary key (athlete_id, planned_date)
+);

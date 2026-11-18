@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { RegisterSW } from "@/components/RegisterSW";
+import { TabBar } from "@/components/TabBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR">
       <body>
         {children}
+        <TabBar />
         <RegisterSW />
       </body>
     </html>

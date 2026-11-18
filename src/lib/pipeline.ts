@@ -20,7 +20,8 @@ import {
   type ActivityUpsert,
 } from "./db";
 import { env } from "./env";
-import { PLAN, workoutOn } from "./plan";
+import { myPlan } from "./my-plan";
+import { addDays, nextWorkout, workoutOn } from "./plan";
 import { StravaClient, StravaError, type StravaActivity } from "./strava";
 import { notifyTelegram } from "./telegram";
 
@@ -120,10 +121,9 @@ export async function feedbackFor(athleteId: number, activityId: number): Promis
       date: (r.start_date_local ?? "").slice(0, 10),
       verdict: verdictOf(r.feedback),
     }));
-  const next =
-    PLAN.flatMap((w) => w.workouts).find((w) => w.date > localDate) ?? null;
-
-  const planned = workoutOn(localDate);
+  const { plan } = await myPlan(athleteId);
+  const next = nextWorkout(addDays(localDate, 1), plan);
+  const planned = workoutOn(localDate, plan);
   const text = env.hasClaude
     ? await generateFeedback({
         activity: {
