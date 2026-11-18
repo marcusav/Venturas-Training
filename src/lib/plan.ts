@@ -4,7 +4,7 @@
  */
 
 export const ATHLETE_GOAL =
-  "Saúde e conseguir fazer 1 longo de 15 km por mês. Sem prova-alvo. 3 corridas/semana, longo no domingo.";
+  "Saúde e conseguir fazer 1 longo de 15 km por mês. Sem prova-alvo. 3 corridas/semana, longo no sábado.";
 
 export const TARGET = {
   z2HrMax: 145,
@@ -36,9 +36,9 @@ const Z2 = `Z2: FC ${TARGET.z2HrMin}–${TARGET.z2HrMax} bpm, pace livre`;
 function week(
   start: string,
   label: string,
-  wed: number,
-  fri: number,
-  sun: number,
+  tue: number,
+  thu: number,
+  sat: number,
   deload = false,
 ): PlanWeek {
   const add = (days: number) => {
@@ -46,30 +46,30 @@ function week(
     d.setUTCDate(d.getUTCDate() + days);
     return d.toISOString().slice(0, 10);
   };
-  const isGoal = sun >= 15;
+  const isGoal = sat >= 15;
   return {
     start,
     label,
     deload,
     workouts: [
       {
-        date: add(2),
+        date: add(1),
         type: "Rodagem leve",
-        km: wed,
-        structure: `1 km trote bem leve, ${br(wed - 1.5)} km contínuo, 0,5 km solto`,
+        km: tue,
+        structure: `1 km trote bem leve, ${br(tue - 1.5)} km contínuo, 0,5 km solto`,
         target: Z2,
       },
       {
-        date: add(4),
+        date: add(3),
         type: "Leve + strides",
-        km: fri,
-        structure: `1 km aquecimento, ${br(fri - 1.5)} km Z2, 4×20 s strides soltos, 0,5 km solto`,
+        km: thu,
+        structure: `1 km aquecimento, ${br(thu - 1.5)} km Z2, 4×20 s strides soltos, 0,5 km solto`,
         target: `${Z2}; strides sem forçar`,
       },
       {
-        date: add(6),
+        date: add(5),
         type: isGoal ? "Longo 15 km" : "Longo",
-        km: sun,
+        km: sat,
         structure: isGoal
           ? "Tudo em Z2. Hidratação a cada 20–25 min. Caminhe 30 s se a FC passar de 145"
           : "Tudo em Z2. Caminhe 30 s se a FC passar de 145. Saia cedo por causa do calor",
