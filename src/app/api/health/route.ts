@@ -19,15 +19,32 @@ const VARS = [
  */
 export async function GET() {
   const vars = Object.fromEntries(VARS.map((v) => [v, Boolean(process.env[v])]));
-  let database: { ok: boolean; tables?: boolean; error?: string } = { ok: false };
+  let database: { ok: boolean; host?: string; tables?: boolean; error?: string } = { ok: false };
+  try {
+    // Host e porta do banco (sem usuário e senha), para conferir se é o pooler.
+    const u = new URL(process.env.DATABASE_URL ?? "");
+    database.host = `${u.hostname}:${u.port || "5432"}`;
+  } catch {
+    if (process.env.DATABASE_URL) database.host = "URI inválida";
+  }
   if (process.env.DATABASE_URL) {
     try {
       const rows = await sql()`select to_regclass('public.activities') is not null as t`;
-      database = { ok: true, tables: Boolean(rows[0]?.t) };
+      database = { ...database, ok: true, tables: Boolean(rows[0]?.t) };
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
+      // Erros de rede às vezes vêm sem mensagem (ex.: AggregateError); inclui código e causas.
+      const parts: string[] = [];
+      const collect = (x: unknown) => {
+        if (!x || typeof x !== "object") return;
+        const err = x as { name?: string; code?: string; message?: string; errors?: unknown[]; cause?: unknown };
+        parts.push([err.name, err.code, err.message].filter(Boolean).join(" "));
+        err.errors?.forEach(collect);
+        if (err.cause) collect(err.cause);
+      };
+      collect(e);
+      const msg = parts.filter(Boolean).join(" | ") || String(e);
       // Remove qualquer URI que apareça na mensagem.
-      database = { ok: false, error: msg.replace(/postgres(ql)?:\/\/\S+/gi, "[uri]") };
+      database = { ...database, ok: false, error: msg.replace(/postgres(ql)?:\/\/\S+/gi, "[uri]") };
     }
   } else {
     database = { ok: false, error: "DATABASE_URL ausente" };
