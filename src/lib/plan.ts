@@ -100,6 +100,8 @@ interface WeekTemplate {
   deload?: boolean;
   /** Dias fixos só desta semana (sobrepõe a preferência). */
   days?: TrainingDays;
+  /** Treinos fixos só desta semana (substitui easy1/easy2/long e os dias). */
+  custom?: { weekday: number; type: WorkoutType; km: number; structure?: string }[];
 }
 
 function makeWorkout(date: string, type: WorkoutType, km: number): Workout {
@@ -115,6 +117,15 @@ function makeWorkout(date: string, type: WorkoutType, km: number): Workout {
 }
 
 function buildWeek(t: WeekTemplate, prefs: TrainingDays): PlanWeek {
+  if (t.custom) {
+    const workouts = t.custom
+      .map((c) => {
+        const w = makeWorkout(addDays(t.start, offsetOf(c.weekday)), c.type, c.km);
+        return c.structure ? { ...w, structure: c.structure } : w;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+    return { start: t.start, label: t.label, deload: t.deload, workouts };
+  }
   const d = t.days ?? prefs;
   const workouts = [
     makeWorkout(addDays(t.start, offsetOf(d.easy1)), "Rodagem leve", t.easy1),
@@ -127,10 +138,19 @@ function buildWeek(t: WeekTemplate, prefs: TrainingDays): PlanWeek {
 const TEMPLATE: WeekTemplate[] = [
   // Semana 1 excepcional: quarta, quinta e sábado.
   { start: "2026-11-16", label: "Semana 1: retomada", easy1: 4.5, easy2: 5, long: 6, days: { easy1: 3, easy2: 4, long: 6 } },
-  { start: "2026-11-23", label: "Semana 2", easy1: 6, easy2: 6, long: 7.5 },
-  { start: "2026-11-30", label: "Semana 3", easy1: 6.5, easy2: 6.5, long: 9 },
+  // Semana 2 repetida com 4 treinos (seg, qua, sex, sáb): na semana 1 só saíram 2 corridas.
+  {
+    start: "2026-11-23", label: "Semana 2: 4 treinos", easy1: 6, easy2: 6, long: 7.5,
+    custom: [
+      { weekday: 1, type: "Rodagem leve", km: 4, structure: "4 km contínuos em Z2" },
+      { weekday: 3, type: "Rodagem leve", km: 5 },
+      { weekday: 5, type: "Leve + strides", km: 4, structure: "3,5 km em Z2 + 4×20 s strides soltos com 1 min de caminhada entre eles" },
+      { weekday: 6, type: "Longo", km: 7 },
+    ],
+  },
+  { start: "2026-11-30", label: "Semana 3", easy1: 6.5, easy2: 6.5, long: 8.5 }, // longo 7 → 8,5 (+21%)
   { start: "2026-12-07", label: "Semana 4: alívio", easy1: 5, easy2: 5, long: 7, deload: true },
-  { start: "2026-12-14", label: "Semana 5", easy1: 7, easy2: 7, long: 11 },
+  { start: "2026-12-14", label: "Semana 5", easy1: 7, easy2: 7, long: 10.5 },
   { start: "2026-12-21", label: "Semana 6", easy1: 7, easy2: 7, long: 13 },
   { start: "2026-12-28", label: "Semana 7: alívio", easy1: 6, easy2: 6, long: 9, deload: true },
   { start: "2027-01-04", label: "Semana 8: primeiro 15 km", easy1: 6, easy2: 6, long: 15 },
